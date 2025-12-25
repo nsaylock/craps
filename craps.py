@@ -6,57 +6,68 @@ Version 1.0
 """
 import random
 
+# DICE KEY - \u2680 = 1
+#            \u2681 = 2
+#            . . .
+#            \u2685 = 6
+
 def main():
     #Main Code Block
     print("craps")
     drawCrapsTable()
 
 def drawCrapsTable():
+    print("            C        R        A        P        S   ")
     drawPlaceBets()
     drawComeLines()
     drawFieldBets()
 
 def drawComeLines():
-    for i in range(34):
-        if i == 0 or i == 17:
+    for i in range(58): #Top Lines
+        if i == 0 or i == 20:
             print(' ',end='')
         print("\u2582",end="")
     print()
-    for i in range(2):
+    for i in range(2): # Word Lines
         if i == 1:
-            print("\u2595   DON\'T COME   \u2595",end='')
-            print("\u2595      COME      \u2595")
-        for j in range(36):
-            if j == 0 or j == 17 or j == 18 or j == 35:
+            print("\u2595     DON\'T COME    \u2595",end='')
+            print("\u2595                COME                 \u2595",end="")
+            print()
+
+        for j in range(60): # Vert Lines
+            if j == 0 or j == 20 or j == 21 or j == 59:
                 print("\u2595",end="")
             else:
                 print(" ",end="")
         print()
-    for i in range(34):
-        if i == 0 or i == 17:
+
+        
+
+    for i in range(58): # Bottom Lines
+        if i == 0 or i == 20:
             print(' ',end='')
         print("\u2594",end="")
     print()
 
 def drawFieldBets():
     # Bullet = \u2219
-    for i in range(35):
+    for i in range(59):
         if i == 0:
             print(' ',end='')
         print("\u2582",end="")
     print()
     for i in range(3):
         if i == 1:
-            print("\u2595   2 \u2219 3 \u2219 4 \u2219 9 \u2219 10 \u2219 11 \u2219 12   \u2595")
+            print("\u2595                2 \u2219 3 \u2219 4 \u2219 9 \u2219 10 \u2219 11 \u2219 12              \u2595")
         if i == 2:
-            print("\u2595              FIELD               \u2595")
-        for j in range(36):
-            if j == 0 or j == 35:
+            print("\u2595                            FIELD                         \u2595")
+        for j in range(60):
+            if j == 0 or j == 59:
                 print("\u2595",end="")
             else:
                 print(" ",end="")
         print()
-    for i in range(35):
+    for i in range(59):
         if i == 0:
             print(' ',end='')
         print("\u2594",end="")
