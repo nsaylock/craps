@@ -1,3 +1,4 @@
+
 """
 Filename: craps.py
 Author: Nick Saylock
@@ -58,6 +59,7 @@ def main():
                         # END SET PASS LINE BET #
         
         #############  Come out roll #####################################3
+        placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0} # Reset place bets
         sum = 7   
         target = 0  
         while gameOn == False and bankroll >= 0:
@@ -84,27 +86,65 @@ def main():
                 target = sum
                 gameOn = True
 
-            drawCrapsTable(bankroll, passBet, target)
+            drawCrapsTable(bankroll, passBet, target, placeBet)
         #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        # Place Bets 4 and 10 ------ 9:5
+        # Place Bets 5 and 9 ------- 7:5
+        # Place Bets 6 and 8 ------- 7:6
+        # Pass Line Odds 4 and 10 -- 2:1
+        # Pass Line Odds 5 and 9 --- 3:2
+        # Pass Line Odds 6 and 8 --- 7:5
+        # Hardways ----- 6 and 8 --- 9:1
+        # Hardwasy ----- 4 and 10 -- 7:1
+        # One Roll ----- 3 and 11 -- 15:1
+        # One Roll ----- 2 and 12 -- 30:1
+
         ################## GAME ON #########################################
         while gameOn == True:
-            bb = input(' Press Enter to Roll')
-            if bb == 'quit': #Make way to quit -- delete later
-                playerQuit = True
-                break  
-            validPlaceBet = False
-            while validPlaceBet == False:
-                placeBetInitializer = input('What Number for Place Bet? (0 for None): ')
-                if placeBetInitializer == 0:
-                    break
-                elif { placeBetInitializer == 4 or placeBetInitializer == 5
-                 or placeBetInitializer == 6 or placeBetInitializer == 8
-                 or placeBetInitializer == 9 or placeBetInitializer == 10 }:
-                    validPlaceBet = True
+            selection = selection_prompt()
+            while selection == 'pb': # PLACE BET Section
+                try:
+                    number = int(input(' What Number for Place Bet? (0 for None): '))
+                    if number == 0:
+                        selection = ' '
+                        break
+                    elif (number == 4 or number == 5 or number == 6 or number == 8 or 
+                    number == 9  or number == 10):
+                        while selection == 'pb':
+                            try:
+                                amount = int(input(' Bet Amount: $'))
+                                if amount < minBet:
+                                    print(' Min Bet is $25')
+                                elif number == 4 or number == 10:
+                                    if amount % 5 != 0:
+                                        print(' Payout is 9:5. Must be denomination of 5')
+                                    else:
+                                        placeBet[number] = amount
+                                        break
+                                elif number == 5 or number == 9:
+                                    if amount % 5 != 0:
+                                        print(' Payout is 7:5. Must be denomination of 5')
+                                    else:
+                                        placeBet[number] = amount
+                                        break
+                                elif number == 6 or number == 8:
+                                    if amount % 6 != 0:
+                                        print(' Payout is 7:6. Must be denomination of 6')
+                                    else:
+                                        placeBet[number] = amount
+                                        break
+                            except ValueError:
+                                print('Invalid Input: Enter a Dollar Amount')
+                    else:
+                        print(' Selected number is not on board')
+                except ValueError:
+                    print('Invalid Input: Enter a Number 4, 5, 6, 8, 9, or 10')
+                print_dice_roll(dice)
+                drawCrapsTable(bankroll, passBet, target, placeBet)
             
 
-
-
+            #            4, 5, 6, 8, 9, 10
+            #placeBet = [0, 1, 2, 3, 4, 5]
             dice = dice_roll()
             sum = dice[2]
             print_dice_roll(dice)
@@ -136,7 +176,15 @@ def main():
         
 #   ^  End Main Game Loop
 
-
+def selection_prompt():
+    print('\n pb | Place Bet')
+    print(' hw | hardways')
+    print(' or | One Roll Bets')
+    print(' Press Enter to Roll')
+    selection = 'badstring'
+    while selection != 'pb' and selection != 'hw' and selection != 'or' and selection != '':
+        selection = input(' ->')
+    return selection
 
 def dice_roll():
     dice = []        
@@ -153,7 +201,7 @@ def drawInitialCrapsTable():
     drawHardways()
     drawCrapsBets()
 
-def drawCrapsTable(bankroll, passBet, target):
+def drawCrapsTable(bankroll, passBet, target, placeBet):
     if target == 0:
         pass
     elif target == 4:
@@ -170,6 +218,40 @@ def drawCrapsTable(bankroll, passBet, target):
         print('                                                       ON')
     
     drawPlaceBets()
+    #placeBet = [4:0, 5:0, 6:30, 8:30, 9:0, 10:0]
+    for i, amount in placeBet.items():
+        if amount != 0:
+            print('    $', amount,sep='', end='   ')
+        else:
+            print('          ',end='')
+
+    '''
+    if placeBet[4] != 0:
+        print('       $', placeBet[4],sep='', end='')
+    else:
+        print('         ',end='')
+    if placeBet[5] != 0:
+        print('       $', placeBet[5], end='')
+    else:
+        print('         ',end='')
+    if placeBet[6] != 0:
+        print('       $', placeBet[6], end='')
+    else:
+        print('        ', end='')
+    if placeBet[8] != 0:
+        print('       $', placeBet[8], end='')
+    else:
+        print('         ', end='')
+    if placeBet[9] != 0:
+        print('       $', placeBet[9], end='')
+    else:
+        print('         ', end='')
+    if placeBet[10] != 0:
+        print('       $', placeBet[10], end='')
+    else:
+        print('         ', end='')
+    '''
+    print()
     drawComeLines()
     drawFieldBets()
     drawHardways()
