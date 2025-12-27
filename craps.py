@@ -26,17 +26,19 @@ def main():
     intCheck = False
     playerQuit = False
     gameOn = False
+    roundWon = False
 
     print(' Welcome to NS Casino Craps Table!')
     print(' You have $500 to make it big or lose it all')
     print(' The minimum bet is $25. Maximum is $2000. Bet $0 to exit.')
-    print(' Don\'t pass is currently unavailable. Place your bet on the pass line')
+    print(' Place your bet on the pass line')
     print('\n\n\n')
     drawInitialCrapsTable()
     
     print('\n\n Bankroll: $', bankroll, sep='')
     print()
     while bankroll > 0 and playerQuit == False:     # PASS LINE BET --------------
+
         while passBet < minBet or passBet > maxBet or passBet > bankroll:
             try:
                 passBet = int(input(' Pass Line Bet: $'))
@@ -53,15 +55,19 @@ def main():
                     bankroll -= passBet
             except ValueError:
                 print(' Invalid Input: Enter a Number')
+
         if playerQuit:
             print(' Player Quit')
             break    
                         # END SET PASS LINE BET #
         
         #############  Come out roll #####################################3
-        placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0} # Reset place bets
+        if roundWon == False:
+            placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0} # Reset place bets
+
         sum = 7   
         target = 0  
+
         while gameOn == False and bankroll >= 0:
             bb = input(' Press Enter to Roll')
             if bb == 'quit': #Make way to quit -- delete later
@@ -69,24 +75,34 @@ def main():
                 break
             dice = dice_roll()
             sum = dice[2]
-            print_dice_roll(dice)
+            if bankroll < minBet or sum < 4 or sum == 12 or sum == 7 or sum == 11:
+                drawCrapsTable(target, placeBet)
+                print_dice_roll(dice)
+
             if bankroll < minBet:
                 print(' You don\'t have enough money left')
                 playerQuit = True
             elif sum < 4 or sum == 12:
                 bankroll -= passBet
                 print(' Craps! You lost $',passBet,sep='')
+                drawPassLine(bankroll, passBet)
             elif sum == 7:
                 bankroll += passBet
-                print('Lucky Seven! You won $',passBet,sep='')
+                print(' Lucky Seven! You won $',passBet,sep='')
+                drawPassLine(bankroll, passBet)
             elif sum == 11:
                 bankroll += passBet
-                print('YO Eleven! You won $',passBet,sep='')
+                print(' YO ELEVEN! You won $',passBet,sep='')
+                drawPassLine(bankroll, passBet)
             else:
                 target = sum
                 gameOn = True
+                drawCrapsTable(target, placeBet)
+                print_dice_roll(dice)
+                drawPassLine(bankroll, passBet)
+            
 
-            drawCrapsTable(bankroll, passBet, target, placeBet)
+
         #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         # Place Bets 4 and 10 ------ 9:5
         # Place Bets 5 and 9 ------- 7:5
@@ -99,91 +115,145 @@ def main():
         # One Roll ----- 3 and 11 -- 15:1
         # One Roll ----- 2 and 12 -- 30:1
 
-        ################## GAME ON #########################################
+        ################## GAME ON - Point Established#########################################
+
         while gameOn == True:
             selection = selection_prompt()
+            if selection == 'quit':
+                gameOn = False
+                playerQuit = True
+                break
+
             while selection == 'pb': # PLACE BET Section
                 try:
-                    number = int(input(' What Number for Place Bet? (0 for None): '))
+                    number = int(input(' What Number for Place Bet? (0 when done): '))
                     if number == 0:
-                        selection = ' '
+                        selection = 'donotequalthis' # Change selection to exit while loop
+                        drawCrapsTable(target, placeBet)
+                        print_dice_roll(dice)
+                        drawPassLine(bankroll, target)
                         break
                     elif (number == 4 or number == 5 or number == 6 or number == 8 or 
                     number == 9  or number == 10):
+
                         while selection == 'pb':
                             try:
                                 amount = int(input(' Bet Amount: $'))
                                 if amount < minBet:
                                     print(' Min Bet is $25')
+                                elif placeBet[number] != 0:
+                                        print(' ', number, ' already has place bet')
+                            # ------- Valid Place Bets ---------------------------------------------
                                 elif number == 4 or number == 10:
                                     if amount % 5 != 0:
                                         print(' Payout is 9:5. Must be denomination of 5')
                                     else:
                                         placeBet[number] = amount
+                                        bankroll -= amount
                                         break
                                 elif number == 5 or number == 9:
                                     if amount % 5 != 0:
                                         print(' Payout is 7:5. Must be denomination of 5')
                                     else:
                                         placeBet[number] = amount
+                                        bankroll -= amount
                                         break
                                 elif number == 6 or number == 8:
                                     if amount % 6 != 0:
                                         print(' Payout is 7:6. Must be denomination of 6')
                                     else:
                                         placeBet[number] = amount
+                                        bankroll -= amount
                                         break
+                            # ^^^^^^^^^^ Valid Place Bets ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                             except ValueError:
                                 print('Invalid Input: Enter a Dollar Amount')
+
                     else:
                         print(' Selected number is not on board')
                 except ValueError:
                     print('Invalid Input: Enter a Number 4, 5, 6, 8, 9, or 10')
+                drawCrapsTable(target, placeBet)
                 print_dice_roll(dice)
-                drawCrapsTable(bankroll, passBet, target, placeBet)
-            
+                drawPassLine(bankroll, passBet)
+            # Hardways Bet Tree Goes Here
+            # One Roll Bet Tree Goes Here
 
-            #            4, 5, 6, 8, 9, 10
-            #placeBet = [0, 1, 2, 3, 4, 5]
-            dice = dice_roll()
-            sum = dice[2]
-            print_dice_roll(dice)
-            if sum == target:
-                bankroll += passBet
-            elif sum == 2:
-                print('Snake Eyes')
-            elif sum == 3:
-                print('Craps Three')
-            elif sum == 4:
-                print('Four')
-            elif sum == 5:
-                print('Five')
-            elif sum == 6:
-                print('Six')
-            elif sum == 7:
-                print('Seven Out')
-                gameOn = False
-            elif sum == 8:
-                print('Eight')
-            elif sum == 9:
-                print('Nine')
-            elif sum == 10:
-                print('Ten')
-            elif sum == 11:
-                print('Yo Eleven')
-            elif sum == 12:
-                print('Midnight')
+            ############# GAME ON ROLLS ##################################################
+            if selection != 'donotequalthis':
+                dice = dice_roll()
+                sum = dice[2]
+
+                drawCrapsTable(target, placeBet)
+                print_dice_roll(dice)
+
+                if sum == 2:
+                    print(' Snake Eyes')
+                elif sum == 3:
+                    print(' Craps Three')
+                elif sum == 4:
+                    if placeBet[4] != 0:
+                        win = int(placeBet[4]*9/5)
+                        bankroll += win
+                        print(' You won $',win,sep='')
+                elif sum == 5:
+                    if placeBet[5] != 0:
+                        win = int(placeBet[5]*7/5)
+                        bankroll += win
+                        print(' You won $',win,sep='')
+                elif sum == 6:
+                    if placeBet[6] != 0:
+                        win = int(placeBet[6]*7/6)
+                        bankroll += win
+                        print(' You won $',win,sep='')
+                elif sum == 7:
+                    passBet = 0
+                    target = 0
+                    placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
+                    drawCrapsTable(target, placeBet)
+                    print_dice_roll(dice)
+                    print('Seven Out | All Bets Cleared')
+                    gameOn = False
+                    roundWon = False
+                elif sum == 8:
+                    if placeBet[8] != 0:
+                        win = int(placeBet[6]*7/6)
+                        bankroll += win
+                        print(' You won $',win,sep='')
+                elif sum == 9:
+                    if placeBet[9] != 0:
+                        win = int(placeBet[5]*7/5)
+                        bankroll += win
+                        print(' You won $',win,sep='')
+                elif sum == 10:
+                    if placeBet[10] != 0:
+                        win = int(placeBet[4]*9/5)
+                        bankroll += win
+                        print(' You won $',win,sep='')
+                elif sum == 11:
+                    print(' Yo Eleven')
+                elif sum == 12:
+                    print(' Midnight')
+
+                if sum == target:
+                    bankroll += passBet
+                    print('Hit target number, Game goes off')
+                    gameOn = False
+                    roundWon = True
+
+                drawPassLine(bankroll, passBet)
         
 #   ^  End Main Game Loop
 
 def selection_prompt():
-    print('\n pb | Place Bet')
-    print(' hw | hardways')
-    print(' or | One Roll Bets')
+    print(' pb - Place Bet |', end='')
+    print(' hw - hardways |', end='')
+    print(' or - One Roll Bets |',end='')
+    print(' quit - Exit game')
     print(' Press Enter to Roll')
     selection = 'badstring'
-    while selection != 'pb' and selection != 'hw' and selection != 'or' and selection != '':
-        selection = input(' ->')
+    while selection != 'pb' and selection != 'hw' and selection != 'or' and selection != '' and selection != 'quit':
+        selection = input(' ')
     return selection
 
 def dice_roll():
@@ -201,7 +271,7 @@ def drawInitialCrapsTable():
     drawHardways()
     drawCrapsBets()
 
-def drawCrapsTable(bankroll, passBet, target, placeBet):
+def drawCrapsTable(target, placeBet):
     if target == 0:
         pass
     elif target == 4:
@@ -256,7 +326,7 @@ def drawCrapsTable(bankroll, passBet, target, placeBet):
     drawFieldBets()
     drawHardways()
     drawCrapsBets()
-    drawPassLine(bankroll, passBet)
+    
 
 def drawPlaceBets():        # Place bets ---------------------------    
     placeBetHorLine("\u2582")
@@ -432,68 +502,68 @@ def drawPassLine(bankroll, passBet):
         print('  PASS LINE: \n')
     else:    
         #print(' DON\'T PASS: ')
-        print(' PASS LINE:  $',passBet,sep='')
+        print(' PASS LINE: $',passBet,sep='')
     print(' BANKROLL: $',bankroll,sep='')
+    print()
 
 def print_dice_roll(dice):
-    print('\n\n')
     for i in range(2):
         if dice[i] == 1:
-            print(' \u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595      \u25CF       \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595              \u258F')
-            print('  \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
+            print('\u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
+            print('\u2595              \u258F')
+            print('\u2595              \u258F')
+            print('\u2595      \u25CF       \u258F')
+            print('\u2595              \u258F')
+            print('\u2595              \u258F')
+            print('\u2595              \u258F')
+            print(' \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
             
         elif dice[i] == 2:
-            print(' \u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
-            print(' \u2595          \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595  \u25CF           \u258F')
-            print(' \u2595              \u258F')
-            print('  \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
+            print('\u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
+            print('\u2595          \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print('\u2595              \u258F')
+            print('\u2595              \u258F')
+            print('\u2595  \u25CF           \u258F')
+            print('\u2595              \u258F')
+            print(' \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
 
         elif dice[i] == 3:
-            print(' \u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
-            print(' \u2595          \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595      \u25CF       \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595  \u25CF           \u258F')
-            print(' \u2595              \u258F')
-            print('  \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
+            print('\u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
+            print('\u2595          \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print('\u2595      \u25CF       \u258F')
+            print('\u2595              \u258F')
+            print('\u2595  \u25CF           \u258F')
+            print('\u2595              \u258F')
+            print(' \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
         elif dice[i] == 4:
-            print(' \u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
-            print(' \u2595  \u25CF       \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595  \u25CF       \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print('  \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
+            print('\u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
+            print('\u2595  \u25CF       \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print('\u2595              \u258F')
+            print('\u2595              \u258F')
+            print('\u2595  \u25CF       \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print(' \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
         elif dice[i] == 5:
-            print(' \u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
-            print(' \u2595  \u25CF       \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595      \u25CF       \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595  \u25CF       \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print('  \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
+            print('\u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
+            print('\u2595  \u25CF       \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print('\u2595      \u25CF       \u258F')
+            print('\u2595              \u258F')
+            print('\u2595  \u25CF       \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print(' \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
         else:
-            print(' \u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
-            print(' \u2595  \u25CF       \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595  \u25CF       \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print(' \u2595  \u25CF       \u25CF   \u258F')
-            print(' \u2595              \u258F')
-            print('  \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
+            print('\u2595\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u258F')
+            print('\u2595  \u25CF       \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print('\u2595  \u25CF       \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print('\u2595  \u25CF       \u25CF   \u258F')
+            print('\u2595              \u258F')
+            print(' \u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594\u2594')
 
 if __name__ == "__main__":
     main()
