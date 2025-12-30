@@ -7,9 +7,10 @@ Version 1.0
 """
 import random
 # To DO next: 
-# Make a way to have place bet go behind the line
+# Make a way to have place bet go behind the line ---- Will display for now, need way to calculate winning this bet
 # Let player overwrite place bet without getting stuck in loop
 # Let player pull back place bets
+# Let Player buy 4 and 10 bets
 
 # DICE KEY - \u2680 = 1
 #            \u2681 = 2
@@ -24,6 +25,7 @@ def main():
     print("            CRAPS V1.0\n\n\n\n")
 
     passBet = 0
+    passOdds = 0
     bankroll = 500
     minBet = 25
     maxBet = 2000
@@ -65,15 +67,15 @@ def main():
                         # END SET PASS LINE BET #
         
         #############  Come out roll #####################################3
-        if roundWon == False:
-            placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0} # Reset place bets
+        if roundWon == False:                                   # Initial is false, assign true when dice sum = target, assign false when sum = 7
+            placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}          # Initialize/Reset place bets in Dictionary
 
-        sum = 7   
-        target = 0  
+        #sum = 7         # Initial value allows
+        target = 0         # Initial Value to get passed into function before assigned a useful number
         print()
         while gameOn == False and bankroll >= 0:
             bb = input(' Press Enter to Roll')
-            if bb == 'quit': #Make way to quit -- delete later
+            if bb == 'quit': #Make way to quit -- delete later -- delete later -- delete later -- delete later -- delete later --
                 playerQuit = True
                 break
             dice = dice_roll()
@@ -86,18 +88,18 @@ def main():
                 print(' You don\'t have enough money left')
                 playerQuit = True
             elif sum < 4 or sum == 12:
-                draw_pass_line(bankroll, passBet)
+                draw_pass_line(bankroll, passBet, passOdds)
                 print(' Craps! You lost $',passBet, ' from the Pass Line\n',sep='')
                 passBet = 0
                 break
             elif sum == 7:
                 bankroll += passBet
-                draw_pass_line(bankroll, passBet)
+                draw_pass_line(bankroll, passBet, passOdds)
                 print(' Lucky Seven! You won $',passBet,sep='')
                 print(' BANKROLL: $', bankroll, sep='', end='\n')
             elif sum == 11:
                 bankroll += passBet
-                draw_pass_line(bankroll, passBet)
+                draw_pass_line(bankroll, passBet, passOdds)
                 print(' YO ELEVEN! You won $',passBet,sep='')
                 print(' BANKROLL: $', bankroll, sep='', end='\n')
             else:
@@ -106,10 +108,11 @@ def main():
                 draw_craps_table(target, placeBet)
                 print_dice_roll(dice)
                 print('    <<',target,'>>\n')
-                draw_pass_line(bankroll, passBet)
+                draw_pass_line(bankroll, passBet, passOdds)
                 print(' GAME ON | Point Established on ', target, '. Place additional bets now',sep='')
 
-        #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        #^^^^^^^^^^^^^^^^^^^^ END COME OUT ROLL ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
         # Place Bets 4 and 10 ------ 9:5
         # Place Bets 5 and 9 ------- 7:5
         # Place Bets 6 and 8 ------- 7:6
@@ -121,7 +124,7 @@ def main():
         # One Roll ----- 3 and 11 -- 15:1
         # One Roll ----- 2 and 12 -- 30:1
 
-        ################## GAME ON - Point Established#########################################
+        ################## GAME ON - << Point Established >> #########################################
 
         while gameOn == True:
             selection = selection_prompt()
@@ -135,19 +138,48 @@ def main():
                 try:
                     number = int(input(' What Number for Place Bet? (0 when done): '))
                     if number == 0:
-                        selection = 'donotequalthis' # Change selection to exit while loop
+                        selection = 'gobacktoselectionmenu' # Change selection to exit while loop
                         draw_craps_table(target, placeBet)
                         #print_dice_roll(dice)
-                        draw_pass_line(bankroll, passBet)
+                        draw_pass_line(bankroll, passBet, passOdds)
                         break
+                    elif number == target:
+                        print('Place bets on point target will be placed behind the pass line for better payout')
+                        while selection == 'pb':
+                            try:
+                                passOdds = int(input(' Pass Line Odds Bet Amount $'))
+                                if passOdds < minBet:
+                                    print(' Min Bet is $', minBet, sep='')
+                                elif passOdds > maxBet:
+                                    print(' Max Bet is $', maxBet, sep='')
+                                elif number == 4 or number == 10:
+                                    # Pay is 2:1 any amount over minBet and less than maxBet should be good to go
+                                    bankroll -= passOdds
+                                    break
+                                elif number == 5 or number == 9:
+                                    if passOdds % 2 != 0:
+                                        print(' Payout is 3:2. Must be divisible by 2')
+                                    else:
+                                        bankroll -= passOdds
+                                        break
+                                elif number == 6 or number == 8:
+                                    if passOdds % 5 != 0:
+                                        print(' Payout is 7:5. Must be divisible by 5')
+                                    else:
+                                        bankroll -= passOdds
+                                        break
+                            except ValueError:
+                                print(' Invalid Input: Enter a dollar amount using numbers')
                     elif (number == 4 or number == 5 or number == 6 or number == 8 or 
                     number == 9  or number == 10):
 
                         while selection == 'pb':
                             try:
-                                amount = int(input(' Bet Amount: $'))
+                                amount = int(input(' Bet Amount: $'))           # amount as variable name may be arbitrary
                                 if amount < minBet:
-                                    print(' Min Bet is $25')
+                                    print(' Min Bet is $', minBet, sep='')
+                                elif amount > maxBet:
+                                    print(' Max Bet is $', maxBet, sep='')
                                 elif placeBet[number] != 0:
                                         print(' ', number, ' already has place bet') ## ERROR ERROR ERROR ERROR ERROR WILL GET STUCK IN LOOP
                             # ------- Valid Place Bets ---------------------------------------------
@@ -182,26 +214,26 @@ def main():
                     print(' Invalid Input: Enter a Number 4, 5, 6, 8, 9, or 10')
                 draw_craps_table(target, placeBet)
                 #print_dice_roll(dice)
-                draw_pass_line(bankroll, passBet)
+                draw_pass_line(bankroll, passBet, passOdds)
             # Hardways Bet Tree Goes Here
             # One Roll Bet Tree Goes Here
 
-            ############# GAME ON ROLLS ##################################################
-            if selection != 'donotequalthis':
-                dice = dice_roll()
+            ############# GAME ON ROLLS - SCORING SECTION ##################################################
+            if selection != 'gobacktoselectionmenu':   # Skips this section when player finishes setting place bets but not ready to roll
+                dice = dice_roll()                     # Will be (selection = '') when player presses enter to roll
                 sum = dice[2]
-                control = True
+                control = True  # Trying to control where the draw_pass_line appears at the bottom of this decision tree
 
                 if sum != 7:
                     draw_craps_table(target, placeBet)
                     print_dice_roll(dice)
 
                 if sum == 2:
-                    draw_pass_line(bankroll, passBet)
+                    draw_pass_line(bankroll, passBet, passOdds)
                     print(' Snake Eyes')
                     control = False
                 elif sum == 3:
-                    draw_pass_line(bankroll, passBet)
+                    draw_pass_line(bankroll, passBet, passOdds)
                     print(' Craps Three')
                     control = False
                 elif sum == 4:
@@ -210,7 +242,7 @@ def main():
                         win = int(placeBet[4]*9/5)
                         bankroll += win
                         if sum != target:
-                            draw_pass_line(bankroll, passBet)
+                            draw_pass_line(bankroll, passBet, passOdds)
                         print(' Place Bet won $',win,sep='')
                         control = False
                 elif sum == 5:
@@ -219,7 +251,7 @@ def main():
                         win = int(placeBet[5]*7/5)
                         bankroll += win
                         if sum != target:
-                            draw_pass_line(bankroll, passBet)
+                            draw_pass_line(bankroll, passBet, passOdds)
                         print(' Place Bet Won $',win,sep='')
                         control = False
                 elif sum == 6:
@@ -228,16 +260,17 @@ def main():
                         win = int(placeBet[6]*7/6)
                         bankroll += win
                         if sum != target:
-                            draw_pass_line(bankroll, passBet)
+                            draw_pass_line(bankroll, passBet, passOdds)
                         print(' Place Bet Won $',win,sep='')
                         control = False
                 elif sum == 7:
                     passBet = 0
+                    passOdds = 0
                     target = 0
                     placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
                     draw_craps_table(target, placeBet)
                     print_dice_roll(dice)
-                    draw_pass_line(bankroll, passBet)
+                    draw_pass_line(bankroll, passBet, passOdds)
                     print(' Seven Out | All Bets Cleared\n')
                     control = False
                     gameOn = False
@@ -248,7 +281,7 @@ def main():
                         win = int(placeBet[6]*7/6)
                         bankroll += win
                         if sum != target:
-                            draw_pass_line(bankroll, passBet)
+                            draw_pass_line(bankroll, passBet, passOdds)
                         print(' Place Bet Won $',win,sep='')
                         control = False
                 elif sum == 9:
@@ -257,7 +290,7 @@ def main():
                         win = int(placeBet[5]*7/5)
                         bankroll += win
                         if sum != target:
-                            draw_pass_line(bankroll, passBet)
+                            draw_pass_line(bankroll, passBet, passOdds)
                         print(' Place Bet Won $',win,sep='')
                         control = False
                 elif sum == 10:
@@ -266,28 +299,29 @@ def main():
                         win = int(placeBet[4]*9/5)
                         bankroll += win
                         if sum != target:
-                            draw_pass_line(bankroll, passBet)
+                            draw_pass_line(bankroll, passBet, passOdds)
                         print(' Place Bet Won $',win,sep='')
                         control = False
                 elif sum == 11:
-                    draw_pass_line(bankroll, passBet)
+                    draw_pass_line(bankroll, passBet, passOdds)
                     print(' Yo Eleven')
                     control = False
                 elif sum == 12:
-                    draw_pass_line(bankroll, passBet)
+                    draw_pass_line(bankroll, passBet, passOdds)
                     print(' Midnight')
                     control = False
 
                 if sum == target:
+                    passOdds = 0
                     bankroll += passBet
                     print(' Pass Line Won $',passBet, sep='')
                     print(' WINNER!! Hit target number',target, '-- Game goes off\n')
-                    draw_pass_line(bankroll, passBet)  # need if statement so this wont print when already printed on winning place bet
+                    draw_pass_line(bankroll, passBet, passOdds)  # need if statement so this wont print when already printed on winning place bet
                     gameOn = False
                     roundWon = True
 
                 if control != False:
-                    draw_pass_line(bankroll, passBet)
+                    draw_pass_line(bankroll, passBet, passOdds)
 
         
 #   ^  End Main Game Loop
@@ -543,9 +577,11 @@ def draw_craps_bets():
                     print(' ',end='')
         print()    
 
-def draw_pass_line(bankroll, passBet):
+def draw_pass_line(bankroll, passBet, passOdds):
     #print(' DON\'T PASS: ')
     print(' PASS LINE: $',passBet,sep='')
+    if passOdds != 0:
+        print(' PASS LINE ODDS: $', passOdds, sep='')
     print(' BANKROLL: $',bankroll,sep='')
     print()
 
