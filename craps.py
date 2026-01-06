@@ -70,6 +70,7 @@ def main():
         #############  Come out roll #####################################3
         if roundWon == False:                                   # Initial is false, assign true when dice sum = target, assign false when sum = 7
             placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}          # Initialize/Reset place bets in Dictionary
+            hardWays = {4:0, 10:0, 6:0, 8:0}
 
         #sum = 7         # Initial value allows
         target = 0         # Initial Value to get passed into function before assigned a useful number
@@ -82,7 +83,7 @@ def main():
             dice = dice_roll()
             sum = dice[2]
             if bankroll < minBet or sum < 4 or sum == 12 or sum == 7 or sum == 11:
-                draw_craps_table(target, placeBet)
+                draw_craps_table(target, placeBet, hardWays)
                 print_dice_roll(dice)
 
             if bankroll < minBet:
@@ -106,7 +107,7 @@ def main():
             else:
                 target = sum
                 gameOn = True
-                draw_craps_table(target, placeBet)
+                draw_craps_table(target, placeBet, hardWays)
                 print_dice_roll(dice)
                 print('    <<',target,'>>\n')
                 draw_pass_line(bankroll, passBet, passOdds)
@@ -140,7 +141,7 @@ def main():
                     number = int(input(' What Number for Place Bet? (0 when done): '))
                     if number == 0:
                         selection = 'gobacktoselectionmenu' # Change selection to exit while loop
-                        draw_craps_table(target, placeBet)
+                        draw_craps_table(target, placeBet, hardWays)
                         #print_dice_roll(dice)
                         draw_pass_line(bankroll, passBet, passOdds)
                         break
@@ -214,10 +215,43 @@ def main():
                         print(' Selected number is not on board')
                 except ValueError:
                     print(' Invalid Input: Enter a Number 4, 5, 6, 8, 9, or 10')
-                draw_craps_table(target, placeBet)
+                draw_craps_table(target, placeBet, hardWays)
                 #print_dice_roll(dice)
                 draw_pass_line(bankroll, passBet, passOdds)
+
             # Hardways Bet Tree Goes Here
+            while selection == 'hw':
+                try:
+                    hardNumber = int(input(' Which Number for Hard Ways Bet? (0 When Done): '))
+                    if hardNumber == 0:
+                        selection = 'gobacktoselectionmenu'
+                        draw_craps_table(target, placeBet, hardWays)
+                        draw_pass_line(bankroll, passBet, passOdds)
+                    elif hardNumber == 4 or hardNumber == 6 or hardNumber == 8 or hardNumber == 10:
+                        while selection == 'hw':
+                            try:
+                                amount = int(input(' Enter amount $'))
+                                if amount > bankroll:
+                                    print(' You don\'t have that much money try again')
+                                elif amount == 0:
+                                    print(' Betting Canceled')
+                                    break
+                                elif amount < 0:
+                                    print(' Negative bets are not accepted here. Try again')
+                                elif amount > maxBet:
+                                    print(' Max bet is $2000. Try again')
+                                else:
+                                    hardWays[hardNumber] = amount
+                                    break
+                            except ValueError:
+                                print(' Invalid Input: Enter a Dollar amount')
+                    else:
+                        print(' The only hard numbers are 4, 6, 8, and 10')
+                except ValueError:
+                    print(' Invalid Input: Enter an Integer')
+
+                draw_craps_table(target, placeBet, hardWays)
+                draw_pass_line(bankroll, passBet, passOdds)
             # One Roll Bet Tree Goes Here
 
             ############# GAME ON ROLLS - SCORING SECTION ##################################################
@@ -227,7 +261,7 @@ def main():
                 control = True  # Trying to control where the draw_pass_line appears at the bottom of this decision tree
 
                 if sum != 7:
-                    draw_craps_table(target, placeBet)
+                    draw_craps_table(target, placeBet, hardWays)
                     print_dice_roll(dice)
 
                 if sum == 2:
@@ -271,9 +305,10 @@ def main():
                     passOddsPlayed = False
                     target = 0
                     placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
-                    print(' Seven Out | All Bets Cleared\n')
-                    draw_craps_table(target, placeBet)
+                    hardWays = {4:0, 10:0, 6:0, 8:0}
+                    draw_craps_table(target, placeBet, hardWays)
                     print_dice_roll(dice)
+                    print(' Seven Out | All Bets Cleared\n')
                     draw_pass_line(bankroll, passBet, passOdds)
                     control = False
                     gameOn = False
@@ -365,7 +400,7 @@ def draw_initial_craps_table():
     draw_hardways()
     draw_craps_bets()
 
-def draw_craps_table(target, placeBet):
+def draw_craps_table(target, placeBet, hardWays):
     if target == 0:
         pass
     elif target == 4:
@@ -385,40 +420,19 @@ def draw_craps_table(target, placeBet):
     #placeBet = [4:0, 5:0, 6:30, 8:30, 9:0, 10:0]
     for i, amount in placeBet.items():
         if amount != 0:
-            print('    $', amount,sep='', end='   ')
+            print('    $', amount,sep='', end='     ')
         else:
             print('          ',end='')
-
-    '''
-    if placeBet[4] != 0:
-        print('       $', placeBet[4],sep='', end='')
-    else:
-        print('         ',end='')
-    if placeBet[5] != 0:
-        print('       $', placeBet[5], end='')
-    else:
-        print('         ',end='')
-    if placeBet[6] != 0:
-        print('       $', placeBet[6], end='')
-    else:
-        print('        ', end='')
-    if placeBet[8] != 0:
-        print('       $', placeBet[8], end='')
-    else:
-        print('         ', end='')
-    if placeBet[9] != 0:
-        print('       $', placeBet[9], end='')
-    else:
-        print('         ', end='')
-    if placeBet[10] != 0:
-        print('       $', placeBet[10], end='')
-    else:
-        print('         ', end='')
-    '''
     print()
     draw_come_lines()
     draw_field_bets()
     draw_hardways()
+    for i, amount in hardWays.items():
+        if amount != 0:
+            print('       $', amount,sep='', end='      ')
+        else:
+            print('               ',end='')
+    print()
     draw_craps_bets()
     
 
