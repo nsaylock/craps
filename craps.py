@@ -32,6 +32,7 @@ def main():
     playerQuit = False
     gameOn = False
     roundWon = False
+    passOddsPlayed = False
 
     print(' Welcome to NS Casino Craps Table!')
     print(' You have $500 to make it big or lose it all')
@@ -144,6 +145,7 @@ def main():
                         draw_pass_line(bankroll, passBet, passOdds)
                         break
                     elif number == target:
+                        passOddsPlayed = True
                         print('Place bets on point target will be placed behind the pass line for better payout')
                         while selection == 'pb':
                             try:
@@ -266,12 +268,13 @@ def main():
                 elif sum == 7:
                     passBet = 0
                     passOdds = 0
+                    passOddsPlayed = False
                     target = 0
                     placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
+                    print(' Seven Out | All Bets Cleared\n')
                     draw_craps_table(target, placeBet)
                     print_dice_roll(dice)
                     draw_pass_line(bankroll, passBet, passOdds)
-                    print(' Seven Out | All Bets Cleared\n')
                     control = False
                     gameOn = False
                     roundWon = False
@@ -312,11 +315,21 @@ def main():
                     control = False
 
                 if sum == target:
-                    passOdds = 0
                     bankroll += passBet
                     print(' Pass Line Won $',passBet, sep='')
+                    if passOddsPlayed == True:
+                        if target == 4 or target == 10:
+                            win = int(passOdds*2)
+                        elif target == 5 or target == 9:
+                            win = int(passOdds*3/2)
+                        elif target == 6 or target == 8:
+                            win = int(passOdds*7/5)
+                        bankroll += win
+                        print(' Pass Odds Wins $', win, sep='')
                     print(' WINNER!! Hit target number',target, '-- Game goes off\n')
-                    draw_pass_line(bankroll, passBet, passOdds)  # need if statement so this wont print when already printed on winning place bet
+                    passOdds = 0
+                    #draw_pass_line(bankroll, passBet, passOdds)  # need if statement so this wont print when already printed on winning place bet
+                    # Probably could permanently delete ^^^
                     gameOn = False
                     roundWon = True
 
