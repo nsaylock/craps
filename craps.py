@@ -11,6 +11,8 @@ import random
 # Let player overwrite place bet without getting stuck in loop
 # Let player pull back place bets
 # Let Player buy 4 and 10 bets
+# Determine what happens when come bet tries to get assigned to a number that already has a come bet in play
+# What happens when come bet is being assigned and target point is hit
 
 
 # DICE KEY - \u2680 = 1
@@ -28,6 +30,7 @@ def main():
     passBet = 0
     passOdds = 0
     comeBetAmount = 0
+    comeBetInitializer = 0
     bankroll = 500
     minBet = 25
     maxBet = 2000
@@ -80,6 +83,7 @@ def main():
             hardWays = {4:0, 10:0, 6:0, 8:0}
             oneRollBet = {3:0, 11:0, 2:0, 12:0}
             comeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
+            printComeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
 
         #sum = 7         # Initial value allows
         target = 0         # Initial Value to get passed into function before assigned a useful number
@@ -94,7 +98,7 @@ def main():
             dice = dice_roll()
             sum = dice[2]
             if bankroll < minBet or sum < 4 or sum == 12 or sum == 7 or sum == 11:
-                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                 draw_dice_roll(dice)
 
@@ -117,7 +121,7 @@ def main():
             else:
                 target = sum
                 gameOn = True
-                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                 draw_dice_roll(dice)
                 print('    <<',target,'>>')
@@ -152,7 +156,7 @@ def main():
                     number = int(input(' What Number for Place Bet? (0 when done): '))
                     if number == 0:
                         selection = 'gobacktoselectionmenu' # Change selection to exit while loop
-                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                         #draw_dice_roll(dice)
                         draw_pass_line(bankroll, passBet, passOdds)
@@ -233,7 +237,7 @@ def main():
                         print(' Selected number is not on board')
                 except ValueError:
                     print(' Invalid Input: Enter a Number 4, 5, 6, 8, 9, or 10')
-                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
                 draw_pass_line(bankroll, passBet, passOdds)
 
             # HARDWAYS HARDWAYS HARDWAYS HARDWAYS HARDWAYS HARDWAYS HARDWAYS HARDWAYS HARDWAYS
@@ -242,7 +246,7 @@ def main():
                     hardNumber = int(input(' Which Number for Hard Ways Bet? (0 When Done): '))
                     if hardNumber == 0:
                         selection = 'gobacktoselectionmenu'
-                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                         draw_pass_line(bankroll, passBet, passOdds)
                         break
@@ -270,7 +274,7 @@ def main():
                 except ValueError:
                     print(' Invalid Input: Enter an Integer')
 
-                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                 draw_pass_line(bankroll, passBet, passOdds)
             # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -280,7 +284,7 @@ def main():
                     comeBetAmount = int(input(' Enter Amount for Come Bet (0 to Cancel): $'))
                     if comeBetAmount == 0:
                         selection = 'gobacktoselectionmenu'
-                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
                         draw_pass_line(bankroll, passBet, passOdds)
                         print(' Come Bet Canceled')
                         break
@@ -292,7 +296,8 @@ def main():
                         print(' Max bet is $2000. Try again')
                     else:
                         bankroll -= comeBetAmount
-                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                        comeBetInitializer = comeBetAmount
+                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
                         draw_pass_line(bankroll, passBet, passOdds)
                         selection = 'gobacktoselectionmenu'
                         break
@@ -304,7 +309,7 @@ def main():
                     amount = int(input(' Enter Amount for Field Bet (0 to Cancel): $'))
                     if amount == 0:
                         selection = 'gobacktoselectionmenu'
-                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
                         draw_pass_line(bankroll, passBet, passOdds)
                         print(' Field Bet Canceled')
                         break
@@ -327,7 +332,7 @@ def main():
                     number = int(input(' Which number for One Roll Bet? (0 When Done): '))
                     if number == 0:
                         selection = 'gobacktoselectionmenu'
-                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                        draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                         draw_pass_line(bankroll, passBet, passOdds)
                         break
@@ -354,7 +359,7 @@ def main():
                         print(' The only One Roll Bets are 2, 3, 11, and 12')
                 except ValueError:
                     print(' Invalid Input: Enter an integer')
-                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                 draw_pass_line(bankroll, passBet, passOdds)
 
@@ -364,9 +369,11 @@ def main():
                 sum = dice[2]
                 orWin = 0
                 reset_oneRollBet(sum, oneRollBet)
+                printComeBet[sum] = comeBetAmount
+                comeBetInitializer = 0
 
                 if sum != 7:
-                    draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                    draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
                     draw_dice_roll(dice)
 
                 if sum == 2:
@@ -452,9 +459,9 @@ def main():
                     target = 0
                     placeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
                     hardWays = {4:0, 10:0, 6:0, 8:0}
-                    oneRollBet = {3:0, 11:0, 2:0, 12:0}
                     comeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
-                    draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                    printComeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
+                    draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                     draw_dice_roll(dice)
                     draw_pass_line(bankroll, passBet, passOdds)
@@ -547,7 +554,7 @@ def main():
                         bankroll += oddsWin
                         bankroll += passOdds
                         passOdds = 0
-                    draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet)
+                    draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet)
 
                     draw_dice_roll(dice)
                     draw_pass_line(bankroll, passBet, passOdds)
@@ -636,7 +643,7 @@ def draw_initial_craps_table(comeBetAmount):
     draw_hardways()
     draw_one_roll_bets()
 
-def draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, comeBet):
+def draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer, printComeBet):
     print('\n\n\n')
     for i in range(75):
         print('\u2500', end='')
@@ -663,13 +670,13 @@ def draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetAmount, come
         else:
             print('         ',end='')
     print()
-    for i, amount in comeBet.items():
+    for i, amount in printComeBet.items():
         if amount != 0:
             print('    $', amount,sep='', end='    ')
         else:
             print('         ',end='')
     print()
-    draw_come_lines(comeBetAmount)
+    draw_come_lines(comeBetInitializer)
     draw_field_bets()
     draw_hardways()
     for i, amount in hardWays.items():
@@ -717,7 +724,7 @@ def place_bet_hor_line(line):
     print()
 ##################### END Place BETS ##############################
 
-def draw_come_lines(comeBetAmount):
+def draw_come_lines(comeBetInitializer):
     for i in range(58): #Top Lines
         if i == 0 or i == 20:
             print(' ',end='')
@@ -727,10 +734,10 @@ def draw_come_lines(comeBetAmount):
     for i in range(2): # Word Lines
         if i == 1:
             print("\u2595     DON\'T COME    \u2595",end='')
-            if comeBetAmount == 0:
+            if comeBetInitializer == 0:
                 print("\u2595                COME                 \u2595",end="")
             else:
-                print("\u2595                COME    $", comeBetAmount,"          \u2595",sep='',end="")
+                print("\u2595                COME    $", comeBetInitializer,"          \u2595",sep='',end="")
             print()
 
         for j in range(60): # Vert Lines
