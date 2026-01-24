@@ -11,8 +11,13 @@ import random
 # Let player overwrite place bet without getting stuck in loop
 # Let player pull back place bets
 # Let Player buy 4 and 10 bets
+
+# ///////////// COME BETS ////////////////////////
 # Determine what happens when come bet tries to get assigned to a number that already has a come bet in play
 # What happens when come bet is being assigned and target point is hit
+# Come bet needs $25 minimum
+# Come bet should not be returned to player after winning
+
 
 
 # DICE KEY - \u2680 = 1
@@ -31,6 +36,7 @@ def main():
     passOdds = 0
     comeBetAmount = 0
     comeBetInitializer = 0
+    printComeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
     bankroll = 500
     minBet = 25
     maxBet = 2000
@@ -45,7 +51,7 @@ def main():
     print(' The minimum bet is $25. Maximum is $2000. Bet $0 to exit.')
     print(' Place your bet on the pass line')
     print('\n\n\n')
-    draw_initial_craps_table(comeBetAmount)
+    draw_initial_craps_table(printComeBet, comeBetAmount)
     
     print(' Starting Bankroll: $', bankroll, sep='',end='\n\n')
     while bankroll > minBet and playerQuit == False:     # PASS LINE BET --------------
@@ -600,7 +606,7 @@ def main():
 ### ^ End Main Game Loop ##################################################################
 ###########################################################################################
 ###########################################################################################
-print('\n Player Can no longer make the minimum pass line bet. Exiting Game')
+    print('\n Player Can no longer make the minimum pass line bet. Exiting Game')
 
 def reset_oneRollBet(sum, oneRollBet):
     if sum != 2:
@@ -636,8 +642,8 @@ def dice_roll():
     dice.append(dice[0] + dice[1])
     return dice
 
-def draw_initial_craps_table(comeBetAmount):
-    draw_place_bets()
+def draw_initial_craps_table(printComeBet, comeBetAmount):
+    draw_place_bets(printComeBet)
     draw_come_lines(comeBetAmount)
     draw_field_bets()
     draw_hardways()
@@ -663,18 +669,18 @@ def draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer,
     else:
         print('                                                       ON')
     
-    draw_place_bets()
+    draw_place_bets(printComeBet)
     for i, amount in placeBet.items():
         if amount != 0:
             print('    $', amount,sep='', end='    ')
         else:
             print('         ',end='')
     print()
-    for i, amount in printComeBet.items():
-        if amount != 0:
-            print('    $', amount,sep='', end='    ')
-        else:
-            print('         ',end='')
+    #for i, amount in printComeBet.items():
+    #    if amount != 0:
+    #        print('    $', amount,sep='', end='    ')
+    #    else:
+    #        print('         ',end='')
     print()
     draw_come_lines(comeBetInitializer)
     draw_field_bets()
@@ -694,9 +700,10 @@ def draw_craps_table(target, placeBet, hardWays, oneRollBet, comeBetInitializer,
     print()
     
 
-def draw_place_bets():        # Place bets ---------------------------    
+def draw_place_bets(printComeBet):        # Place bets ---------------------------    
     place_bet_hor_line("\u2582")
-    placeBetVertLine()
+    dummyVariable = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0}
+    placeBetVertLine(dummyVariable)
     print(" \u258F   4   \u2595",end=" ")
     print("\u258F   5   \u2595",end=" ")
     print("\u258F   6   \u2595",end=" ")
@@ -704,14 +711,24 @@ def draw_place_bets():        # Place bets ---------------------------
     print("\u258F   9   \u2595",end=" ")
     print("\u258F  10   \u2595",end="")
     print()   
-    placeBetVertLine()
+    placeBetVertLine(printComeBet)
     place_bet_hor_line("\u2594")
 
-def placeBetVertLine():
-    for i in range(6): # Range must be same as length of top lines
-        if i == 0:
+def placeBetVertLine(printComeBet):
+    pbNumbers = [4, 5, 6, 8, 9, 10]
+    for i in pbNumbers:
+        if i == 4:
             print(' ',end='')
-        print("\u258F       \u2595 ", end="")
+
+        if printComeBet[i] != 0: #5 - len of integer
+            print('\u258F $', end='')
+            temp = str(printComeBet[i])
+            print(temp, end='')
+            for j in range(5 - len(temp)):
+                print(' ', end='')
+            print("\u2595 ", end="")
+        else:
+            print("\u258F       \u2595 ", end="")
     print()
 
 def place_bet_hor_line(line):

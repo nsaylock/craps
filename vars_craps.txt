@@ -1,0 +1,7 @@
+comeBetAmount - used for scoring, assigned when player selects come comeBetAmount
+comeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0} - Dictionary used to hold where come bet gets assigned, used for scoring
+comeBetInitializer -> same as comeBetAmount but used to print in come bet area in draw_craps_table
+                    needs to be reset to zero before going into scoring section so it doesn't print again
+printComeBet = {4:0, 5:0, 6:0, 8:0, 9:0, 10:0} -> Dictionary that holds where come bet moves to so it can be printed
+                                                before the bet is scored, otherwise it will be counted on the roll
+                                                that it is moved
